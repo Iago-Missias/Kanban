@@ -47,19 +47,20 @@ export const Login = ({ onLogin }) => {
           {error && <div style={styles.error}>{error}</div>}
           <button 
             type="submit" 
-            style={styles.button}
+            style={{
+              ...styles.button,
+              ...(loading ? styles.buttonDisabled : {})
+            }}
             disabled={loading}
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
-        {/* ⚠️ REMOVIDO: A dica que mostrava o login e senha */}
       </div>
     </div>
   )
 }
 
-// ESTILOS RESPONSIVOS DO LOGIN
 const styles = {
   container: {
     display: 'flex',
@@ -94,26 +95,10 @@ const styles = {
     border: '2px solid #e0e0e0',
     borderRadius: '8px',
     fontSize: 'clamp(14px, 1.5vw, 16px)',
-    transition: 'border-color 0.3s',
-    outline: 'none',
-    width: '100%',
-    backgroundColor: '#f8f9fa'
-  },
-  input: {
-    padding: 'clamp(12px, 2vw, 16px)',
-    border: '2px solid #e0e0e0',
-    borderRadius: '8px',
-    fontSize: 'clamp(14px, 1.5vw, 16px)',
     transition: 'all 0.3s',
     outline: 'none',
     width: '100%',
     backgroundColor: '#f8f9fa'
-  },
-  // Efeito focus nos inputs
-  inputFocus: {
-    borderColor: '#667eea',
-    backgroundColor: 'white',
-    boxShadow: '0 0 0 3px rgba(102, 126, 234, 0.1)'
   },
   button: {
     padding: 'clamp(12px, 2vw, 16px)',
@@ -127,11 +112,6 @@ const styles = {
     transition: 'all 0.3s',
     width: '100%',
     marginTop: '5px'
-  },
-  buttonHover: {
-    background: '#45a049',
-    transform: 'translateY(-2px)',
-    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)'
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -148,6 +128,3 @@ const styles = {
     border: '1px solid #ffcdd2'
   }
 }
-
-// MEDIA QUERIES para o login
-// Adicionar no CSS global ou inline
