@@ -52,9 +52,12 @@ export const Kanban = () => {
           <span style={styles.cardCount}>
             {cards.length} cards
           </span>
-          <button onClick={handleLogout} style={styles.logoutBtn}>
-            {isMobile ? '🚪' : 'Sair'}
-          </button>
+          <button 
+  onClick={handleLogout} 
+  className="font-bold text-white hover:text-gray-200 transition-colors"
+>
+  Sair
+</button>
         </div>
       </header>
 
