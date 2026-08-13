@@ -1,0 +1,53 @@
+/* src/pages/Kanban.css - Estilos responsivos extras */
+
+/* Tablet e telas médias */
+@media (max-width: 1024px) {
+  .kanban-board {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 15px !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .kanban-container {
+    padding: 10px !important;
+    padding-bottom: 100px !important;
+  }
+
+  .kanban-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 15px !important;
+  }
+
+  .kanban-title {
+    font-size: 24px !important;
+    text-align: center !important;
+  }
+
+  .kanban-board {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+
+  .kanban-header-actions {
+    justify-content: center !important;
+  }
+}
+
+/* Telas muito pequenas */
+@media (max-width: 480px) {
+  .kanban-container {
+    padding: 8px !important;
+  }
+
+  .kanban-board {
+    gap: 12px !important;
+  }
+
+  .kanban-logout-btn {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+  }
+}
