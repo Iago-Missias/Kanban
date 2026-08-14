@@ -1,83 +1,159 @@
 import { useState, useEffect } from 'react'
+import { createClient } from '@supabase/supabase-js'
 
-const INITIAL_DATA = {
-  columns: [
-    { id: 'todo', title: '📝 A Fazer' },
-    { id: 'doing', title: '🔄 Em Andamento' },
-    { id: 'done', title: '✅ Concluído' }
-  ],
-  cards: [
-    { id: 1, columnId: 'todo', title: 'Criar projeto', description: 'Iniciar o projeto Kanban' },
-    { id: 2, columnId: 'doing', title: 'Configurar estrutura', description: 'Organizar pastas' },
-    { id: 3, columnId: 'done', title: 'Planejar', description: 'Definir escopo' }
-  ]
-}
+// Configuração do Supabase
+const supabaseUrl = 'https://dwldwqtkellwjjjxslth.supabase.co'
+const supabaseKey = 'sb_publishable_NeV7rWh3Eh_5xWVFLoyPyg_x8mdsrRH'
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+// Colunas fixas
+const columns = [
+  { id: 'todo', title: '📝 A Fazer' },
+  { id: 'doing', title: '🔄 Em Andamento' },
+  { id: 'done', title: '✅ Concluído' }
+]
 
 export const useKanban = () => {
-  const [columns, setColumns] = useState([])
   const [cards, setCards] = useState([])
-  const [nextId, setNextId] = useState(4)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  // Carregar dados do localStorage
-  useEffect(() => {
-    const savedData = localStorage.getItem('kanbanData')
-    if (savedData) {
-      const data = JSON.parse(savedData)
-      setColumns(data.columns || INITIAL_DATA.columns)
-      setCards(data.cards || INITIAL_DATA.cards)
-      setNextId(data.nextId || 4)
-    } else {
-      setColumns(INITIAL_DATA.columns)
-      setCards(INITIAL_DATA.cards)
+  // 🔄 Carregar cards do Supabase
+  const loadCards = async () => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const { data, error } = await supabase
+        .from('cards')
+        .select('*')
+        .order('id', { ascending: true })
+      
+      if (error) {
+        console.error('❌ Erro ao carregar:', error)
+        setError(error.message)
+        setCards([])
+      } else {
+        console.log('✅ Cards carregados:', data?.length || 0, 'cards')
+        setCards(data || [])
+      }
+    } catch (err) {
+      console.error('❌ Erro inesperado:', err)
+      setError(err.message)
+      setCards([])
     }
+    
+    setLoading(false)
+  }
+
+  // Carregar ao iniciar
+  useEffect(() => {
+    loadCards()
   }, [])
 
-  // Salvar dados no localStorage
-  useEffect(() => {
-    if (columns.length > 0 || cards.length > 0) {
-      localStorage.setItem('kanbanData', JSON.stringify({ columns, cards, nextId }))
+  // ➕ Adicionar card no Supabase
+  const addCard = async (columnId, title, description) => {
+    if (!title || !title.trim()) {
+      console.warn('⚠️ Título vazio, não adicionado')
+      return
     }
-  }, [columns, cards, nextId])
-
-  // Adicionar card
-  const addCard = (columnId, title, description) => {
-    if (!title || !title.trim()) return
     
     const newCard = {
-      id: nextId,
-      columnId,
+      column_id: columnId,
       title: title.trim(),
       description: description?.trim() || ''
     }
-    setCards([...cards, newCard])
-    setNextId(nextId + 1)
+    
+    try {
+      const { data, error } = await supabase
+        .from('cards')
+        .insert([newCard])
+        .select()
+      
+      if (error) {
+        console.error('❌ Erro ao adicionar:', error)
+        alert('Erro ao adicionar card: ' + error.message)
+        return
+      }
+      
+      console.log('✅ Card adicionado:', data[0])
+      setCards(prev => [...prev, data[0]])
+    } catch (err) {
+      console.error('❌ Erro inesperado:', err)
+      alert('Erro ao adicionar card')
+    }
   }
 
-  // Mover card
-  const moveCard = (cardId, fromColumnId, toColumnId) => {
-    setCards(cards.map(card => 
-      card.id === cardId ? { ...card, columnId: toColumnId } : card
-    ))
+  // 🔀 Mover card no Supabase
+  const moveCard = async (cardId, fromColumnId, toColumnId) => {
+    try {
+      const { error } = await supabase
+        .from('cards')
+        .update({ column_id: toColumnId })
+        .eq('id', cardId)
+      
+      if (error) {
+        console.error('❌ Erro ao mover:', error)
+        return
+      }
+      
+      setCards(prev => prev.map(card => 
+        card.id === cardId ? { ...card, column_id: toColumnId } : card
+      ))
+    } catch (err) {
+      console.error('❌ Erro inesperado:', err)
+    }
   }
 
-  // Deletar card
-  const deleteCard = (cardId) => {
-    setCards(cards.filter(card => card.id !== cardId))
+  // 🗑️ Deletar card no Supabase
+  const deleteCard = async (cardId) => {
+    try {
+      const { error } = await supabase
+        .from('cards')
+        .delete()
+        .eq('id', cardId)
+      
+      if (error) {
+        console.error('❌ Erro ao deletar:', error)
+        return
+      }
+      
+      setCards(prev => prev.filter(card => card.id !== cardId))
+    } catch (err) {
+      console.error('❌ Erro inesperado:', err)
+    }
   }
 
-  // Atualizar card
-  const updateCard = (cardId, updates) => {
-    setCards(cards.map(card => 
-      card.id === cardId ? { ...card, ...updates } : card
-    ))
+  // ✏️ Atualizar card no Supabase
+  const updateCard = async (cardId, updates) => {
+    try {
+      const { error } = await supabase
+        .from('cards')
+        .update(updates)
+        .eq('id', cardId)
+      
+      if (error) {
+        console.error('❌ Erro ao atualizar:', error)
+        return
+      }
+      
+      setCards(prev => prev.map(card => 
+        card.id === cardId ? { ...card, ...updates } : card
+      ))
+    } catch (err) {
+      console.error('❌ Erro inesperado:', err)
+    }
   }
 
   return {
     columns,
     cards,
+    loading,
+    error,
     addCard,
     moveCard,
     deleteCard,
-    updateCard
+    updateCard,
+    loadCards // Para recarregar manualmente se precisar
   }
 }
