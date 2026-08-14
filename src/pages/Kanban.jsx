@@ -33,8 +33,8 @@ export const Kanban = () => {
 
   const handleDrop = (e, columnId) => {
     e.preventDefault()
-    if (draggedCard && draggedCard.columnId !== columnId) {
-      moveCard(draggedCard.id, draggedCard.columnId, columnId)
+    if (draggedCard && draggedCard.column_id !== columnId) {
+      moveCard(draggedCard.id, draggedCard.column_id, columnId)
     }
     setDraggedCard(null)
   }
@@ -52,12 +52,9 @@ export const Kanban = () => {
           <span style={styles.cardCount}>
             {cards.length} cards
           </span>
-          <button 
-  onClick={handleLogout} 
-  className="font-bold text-white hover:text-gray-200 transition-colors"
->
-  Sair
-</button>
+          <button onClick={handleLogout} style={styles.logoutBtn}>
+            Sair
+          </button>
         </div>
       </header>
 
@@ -66,7 +63,7 @@ export const Kanban = () => {
           <Column
             key={column.id}
             column={column}
-            cards={cards.filter(c => c.columnId === column.id)}
+            cards={cards.filter(c => c.column_id === column.id)}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             onDragStart={handleDragStart}
@@ -104,7 +101,7 @@ const styles = {
     minHeight: '100vh',
     background: '#f4f5f7',
     padding: '20px',
-    paddingBottom: '80px' // Espaço para scroll no mobile
+    paddingBottom: '80px'
   },
   header: {
     display: 'flex',
@@ -116,7 +113,7 @@ const styles = {
     gap: '10px'
   },
   title: {
-    fontSize: 'clamp(20px, 4vw, 32px)', // Tamanho responsivo
+    fontSize: 'clamp(20px, 4vw, 32px)',
     color: '#333'
   },
   headerActions: {
@@ -152,6 +149,3 @@ const styles = {
     margin: '0 auto'
   }
 }
-
-// MEDIA QUERIES - Adicionar via CSS ou inline
-// Vamos adicionar no final do arquivo ou criar um arquivo .css separado
